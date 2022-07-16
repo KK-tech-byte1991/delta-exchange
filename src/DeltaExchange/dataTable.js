@@ -64,10 +64,10 @@ const Datatable = () => {
   };
 
   const [columnDefs] = useState([
-    { field: "symbol" ,pinned:"left"},
-    { field: "description" },
-    { field: "underlying_asset.symbol" },
-    { field: "market" }
+    { field: "symbol", pinned: "left", },
+    { field: "description", width: 300, cellStyle: { textAlign: "left" } },
+    { field: "underlying_asset.symbol", headerName: "Symbol", cellStyle: { textAlign: "left" } },
+    { field: "market", headerName: "Market Price", cellStyle: { textAlign: "left" }, }
   ]);
 
   return (
