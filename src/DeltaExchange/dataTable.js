@@ -7,6 +7,8 @@ const ws = new WebSocket("wss://production-esocket.delta.exchange");
 
 const Datatable = () => {
   const [rowData, setRowData] = useState([]);
+  const [updatedData, setUpdatedData] = useState([]);
+  const [symbolsList, setSymbolsList] = useState([]);
   useEffect(() => {
     axios({
       url: "https://api.delta.exchange/v2/products",
@@ -14,40 +16,57 @@ const Datatable = () => {
     })
       .then((res) => {
         setRowData(res.data.result);
+        // setUpdatedData(res.data.result)
       })
 
       .catch((err) => {
         console.log(err);
       });
   }, []);
+
   useEffect(() => {
     let symboles = [];
     rowData.forEach((value) => {
       symboles.push(value.symbol);
     });
-    // console.log(symboles)
+
+    symboles.length > 0 && setSymbolsList(new Array([...symboles]));
+  }, [rowData]);
+
+  useEffect(() => {
+    console.log("hi", symbolsList);
     let data = {
       type: "subscribe",
       payload: {
         channels: [
           {
             name: "v2/ticker",
-            symbols: symboles
+            symbols: symbolsList[0]
           }
         ]
       }
     };
 
-    // ws.onopen = () => {
-    //     if (symboles.length>0)  {
-    //     ws.send(JSON.stringify(data))   }
-    // }
+    ws.onopen = () => {
+      if (symbolsList[0] && symbolsList[0].length > 0) {
+        ws.send(JSON.stringify(data));
+        console.log("sent");
+      }
+    };
+  }, [symbolsList[0]]);
 
-    // ws.onmessage = evt => {
-    //     const message = JSON.parse(evt.data)
-    //     // console.log(message)
-    // }
-  }, [rowData]);
+  ws.onmessage = (evt) => {
+    const message = JSON.parse(evt.data);
+    let a = rowData.findIndex((val) => {
+      return val.symbol === message.symbol;
+    });
+    console.log(a);
+    let currencyData = rowData;
+    if (a !== -1) {
+      currencyData[a].market = message.mark_price;
+      setUpdatedData([...currencyData]);
+    }
+  };
 
   const [columnDefs] = useState([
     { field: "symbol" },
@@ -59,10 +78,11 @@ const Datatable = () => {
   return (
     <div
       className="ag-theme-alpine"
-      style={{ height: 400, width: 800, margin: "auto" }}
+      style={{ height: "80vh", width: 800, margin: "auto", marginTop: "100px" }}
     >
-      {console.log(rowData)}
-      <AgGridReact rowData={rowData} columnDefs={columnDefs}></AgGridReact>
+      {console.log(symbolsList)}
+      {/* {console.log("updatedData",updateData)} */}
+      <AgGridReact rowData={updatedData} columnDefs={columnDefs}></AgGridReact>
     </div>
   );
 };
