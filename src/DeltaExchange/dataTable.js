@@ -64,7 +64,7 @@ const Datatable = () => {
   };
 
   const [columnDefs] = useState([
-    { field: "symbol" },
+    { field: "symbol" ,pinned:"left"},
     { field: "description" },
     { field: "underlying_asset.symbol" },
     { field: "market" }
