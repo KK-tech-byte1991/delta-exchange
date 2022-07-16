@@ -16,7 +16,7 @@ const Datatable = () => {
     })
       .then((res) => {
         setRowData(res.data.result);
-        // setUpdatedData(res.data.result)
+        setUpdatedData(res.data.result);
       })
 
       .catch((err) => {
@@ -34,7 +34,6 @@ const Datatable = () => {
   }, [rowData]);
 
   useEffect(() => {
-    console.log("hi", symbolsList);
     let data = {
       type: "subscribe",
       payload: {
@@ -47,12 +46,9 @@ const Datatable = () => {
       }
     };
 
-    ws.onopen = () => {
-      if (symbolsList[0] && symbolsList[0].length > 0) {
-        ws.send(JSON.stringify(data));
-        console.log("sent");
-      }
-    };
+    if (symbolsList[0] && symbolsList[0].length > 0) {
+      ws.send(JSON.stringify(data));
+    }
   }, [symbolsList[0]]);
 
   ws.onmessage = (evt) => {
@@ -60,7 +56,6 @@ const Datatable = () => {
     let a = rowData.findIndex((val) => {
       return val.symbol === message.symbol;
     });
-    console.log(a);
     let currencyData = rowData;
     if (a !== -1) {
       currencyData[a].market = message.mark_price;
@@ -80,8 +75,6 @@ const Datatable = () => {
       className="ag-theme-alpine"
       style={{ height: "80vh", width: 800, margin: "auto", marginTop: "100px" }}
     >
-      {console.log(symbolsList)}
-      {/* {console.log("updatedData",updateData)} */}
       <AgGridReact rowData={updatedData} columnDefs={columnDefs}></AgGridReact>
     </div>
   );
